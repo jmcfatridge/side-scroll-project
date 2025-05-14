@@ -1,14 +1,14 @@
 [gd_scene load_steps=32 format=3 uid="uid://cbnrm2uyeid6m"]
 
+[ext_resource type="Script" path="res://Scripts/player.gd" id="1_d13s0"]
 [ext_resource type="Texture2D" uid="uid://c6i07plbnwbxy" path="res://Legacy-Fantasy - High Forest 2.3/Character/Idle/Idle-Sheet.png" id="1_ybmwe"]
-[ext_resource type="Script" path="res://Characters/player.gd" id="1_ydxxw"]
 [ext_resource type="Texture2D" uid="uid://c5uph7oc82enh" path="res://Legacy-Fantasy - High Forest 2.3/Character/Jumlp-All/Jump-All-Sheet.png" id="5_snroh"]
+[ext_resource type="Script" path="res://Scripts/CharacterStateMachine.gd" id="5_uwrmg"]
+[ext_resource type="Script" path="res://Scripts/GroundState.gd" id="6_jd4hy"]
 [ext_resource type="Texture2D" uid="uid://dnnu3k0d330ai" path="res://Legacy-Fantasy - High Forest 2.3/Character/Run/Run-Sheet.png" id="6_vvvrk"]
-[ext_resource type="Script" path="res://Characters/CharacterStateMachine.gd" id="7_a4mg4"]
-[ext_resource type="Script" path="res://Characters/GroundState.gd" id="8_qg3s0"]
-[ext_resource type="Script" path="res://Characters/AirState.gd" id="8_whps2"]
-[ext_resource type="Script" path="res://Characters/LandingState.gd" id="10_bktsj"]
-[ext_resource type="Script" path="res://Characters/StateDebugLabel.gd" id="11_fas1o"]
+[ext_resource type="Script" path="res://Scripts/AirState.gd" id="7_1h3uf"]
+[ext_resource type="Script" path="res://Scripts/LandingState.gd" id="8_jm48u"]
+[ext_resource type="Script" path="res://Scripts/StateDebugLabel.gd" id="9_jhh6u"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlv1e"]
 radius = 8.0
@@ -295,7 +295,7 @@ transitions = ["Start", "Move", SubResource("AnimationNodeStateMachineTransition
 graph_offset = Vector2(0, -138.912)
 
 [node name="Player" type="CharacterBody2D"]
-script = ExtResource("1_ydxxw")
+script = ExtResource("1_d13s0")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 2)
@@ -318,23 +318,23 @@ anim_player = NodePath("../AnimationPlayer")
 parameters/Move/blend_position = 0.0
 
 [node name="CharacterStateMachine" type="Node" parent="." node_paths=PackedStringArray("character", "animation_tree", "current_state")]
-script = ExtResource("7_a4mg4")
+script = ExtResource("5_uwrmg")
 character = NodePath("..")
 animation_tree = NodePath("../AnimationTree")
 current_state = NodePath("Ground")
 
 [node name="Ground" type="Node" parent="CharacterStateMachine" node_paths=PackedStringArray("air_state")]
-script = ExtResource("8_qg3s0")
+script = ExtResource("6_jd4hy")
 air_state = NodePath("../Air")
 jump_animation = "jump_start"
 
 [node name="Air" type="Node" parent="CharacterStateMachine" node_paths=PackedStringArray("landing_state")]
-script = ExtResource("8_whps2")
+script = ExtResource("7_1h3uf")
 landing_state = NodePath("../Landing")
 landing_animation = "jump_end"
 
 [node name="Landing" type="Node" parent="CharacterStateMachine" node_paths=PackedStringArray("ground_state")]
-script = ExtResource("10_bktsj")
+script = ExtResource("8_jm48u")
 landing_animation_name = "jump_end"
 ground_state = NodePath("../Ground")
 can_move = false
@@ -345,7 +345,7 @@ offset_top = -57.0
 offset_right = 69.0
 offset_bottom = -31.0
 text = "State:"
-script = ExtResource("11_fas1o")
+script = ExtResource("9_jhh6u")
 state_machine = NodePath("../CharacterStateMachine")
 
 [connection signal="animation_finished" from="AnimationTree" to="CharacterStateMachine/Landing" method="_on_animation_tree_animation_finished"]
