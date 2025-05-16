@@ -11,47 +11,6 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bqupv"]
 size = Vector2(26.5, 21)
 
-[sub_resource type="Animation" id="Animation_q7j2e"]
-resource_name = "walking"
-length = 0.8
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:texture")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("1_y6apm")]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:hframes")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [8]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D:frame")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [0, 1, 2, 3, 4, 5, 6, 7]
-}
-
 [sub_resource type="Animation" id="Animation_hpdke"]
 length = 0.001
 tracks/0/type = "value"
@@ -107,6 +66,47 @@ tracks/2/keys = {
 "values": [0, 1, 2, 3, 4, 5, 6, 7]
 }
 
+[sub_resource type="Animation" id="Animation_q7j2e"]
+resource_name = "walking"
+length = 0.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("1_y6apm")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [8]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_vk1ig"]
 _data = {
 "RESET": SubResource("Animation_hpdke"),
@@ -132,9 +132,11 @@ states/walking/node = SubResource("AnimationNodeAnimation_ta3uf")
 states/walking/position = Vector2(374, 100)
 transitions = ["Start", "walking", SubResource("AnimationNodeStateMachineTransition_47csw"), "walking", "death", SubResource("AnimationNodeStateMachineTransition_gvw46")]
 
-[node name="Snail" type="CharacterBody2D"]
+[node name="Snail" type="CharacterBody2D" node_paths=PackedStringArray("hit_state")]
 position = Vector2(177, 116)
+collision_layer = 4
 script = ExtResource("1_scd8a")
+hit_state = NodePath("CharaterStateMachine/Hit")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1, 6)
@@ -169,10 +171,17 @@ script = ExtResource("5_ekalu")
 script = ExtResource("5_ekalu")
 can_move = false
 
-[node name="Hit" type="Node" parent="CharaterStateMachine" node_paths=PackedStringArray("damageable", "character_state_machine", "dead_state")]
+[node name="Hit" type="Node" parent="CharaterStateMachine" node_paths=PackedStringArray("damageable", "character_state_machine", "dead_state", "return_state")]
 script = ExtResource("6_pdvdy")
 damageable = NodePath("../../Damageable")
 character_state_machine = NodePath("..")
 dead_state = NodePath("../Death")
+return_state = NodePath("../Walk")
+can_move = false
+
+[node name="Timer" type="Timer" parent="CharaterStateMachine/Hit"]
+wait_time = 0.25
+one_shot = true
 
 [connection signal="animation_finished" from="AnimationTree" to="Damageable" method="_on_animation_tree_animation_finished"]
+[connection signal="timeout" from="CharaterStateMachine/Hit/Timer" to="CharaterStateMachine/Hit" method="_on_timer_timeout"]

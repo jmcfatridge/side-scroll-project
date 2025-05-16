@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://cbnrm2uyeid6m"]
+[gd_scene load_steps=45 format=3 uid="uid://cbnrm2uyeid6m"]
 
 [ext_resource type="Script" path="res://Scripts/player.gd" id="1_d13s0"]
 [ext_resource type="Texture2D" uid="uid://c6i07plbnwbxy" path="res://Legacy-Fantasy - High Forest 2.3/Character/Idle/Idle-Sheet.png" id="1_ybmwe"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://Scripts/StateDebugLabel.gd" id="9_jhh6u"]
 [ext_resource type="Script" path="res://Scripts/AttackState.gd" id="10_ttnap"]
 [ext_resource type="Script" path="res://Scripts/Sword.gd" id="12_mjb48"]
+[ext_resource type="Script" path="res://Scripts/FacingCollisionShape2D.gd" id="13_gsoy6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_nlv1e"]
 radius = 8.0
@@ -422,9 +423,10 @@ transitions = ["Start", "move", SubResource("AnimationNodeStateMachineTransition
 graph_offset = Vector2(0, 34.2309)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2g6kr"]
-size = Vector2(28, 43)
+size = Vector2(28, 45.5)
 
 [node name="Player" type="CharacterBody2D"]
+collision_layer = 2
 script = ExtResource("1_d13s0")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -457,6 +459,11 @@ air_state = NodePath("../Air")
 jump_animation = "jump_start"
 attack_state = NodePath("../Attack")
 
+[node name="BufferTimer" type="Timer" parent="CharacterStateMachine/Ground"]
+wait_time = 0.05
+one_shot = true
+autostart = true
+
 [node name="Air" type="Node" parent="CharacterStateMachine" node_paths=PackedStringArray("landing_state")]
 script = ExtResource("7_1h3uf")
 landing_state = NodePath("../Landing")
@@ -486,13 +493,20 @@ text = "State:"
 script = ExtResource("9_jhh6u")
 state_machine = NodePath("../CharacterStateMachine")
 
-[node name="Sword" type="Area2D" parent="."]
+[node name="Sword" type="Area2D" parent="." node_paths=PackedStringArray("player", "facing_shape")]
+collision_layer = 0
+collision_mask = 4
 monitoring = false
 script = ExtResource("12_mjb48")
+player = NodePath("..")
+facing_shape = NodePath("CollisionShape2D")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Sword"]
-position = Vector2(25, 2.5)
+position = Vector2(25, 0)
 shape = SubResource("RectangleShape2D_2g6kr")
+script = ExtResource("13_gsoy6")
+facing_left_position = Vector2(-25, 0)
+facing_right_position = Vector2(25, 0)
 
 [connection signal="animation_finished" from="AnimationTree" to="CharacterStateMachine/Landing" method="_on_animation_tree_animation_finished"]
 [connection signal="animation_finished" from="AnimationTree" to="CharacterStateMachine/Attack" method="_on_animation_tree_animation_finished"]
